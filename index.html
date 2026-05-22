@@ -93,8 +93,16 @@ input:focus,textarea:focus{outline:none}
 .ai-backdrop.open{opacity:1;pointer-events:auto}
 .ai-close{background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;line-height:1}
 .ai-close:hover{color:var(--text)}
-.guide-btn{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-size:12px;color:var(--text);font-weight:600;cursor:pointer;transition:all 0.15s}
-.guide-btn:hover{border-color:var(--blue);color:var(--blue)}
+.guide-fab{position:fixed;bottom:24px;right:24px;z-index:150;display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--blue),#3a7fb5);border:none;border-radius:30px;padding:13px 20px 13px 16px;cursor:pointer;box-shadow:0 6px 22px rgba(79,172,222,0.45),0 2px 6px rgba(0,0,0,0.3);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,opacity .2s;color:#fff}
+.guide-fab:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 10px 30px rgba(79,172,222,0.6),0 3px 8px rgba(0,0,0,0.35)}
+.guide-fab:active{transform:translateY(-1px) scale(1.0)}
+.guide-fab.hidden{opacity:0;pointer-events:none;transform:scale(0.7)}
+.guide-fab-icon{font-size:18px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))}
+.guide-fab-label{font-size:13px;font-weight:700;letter-spacing:0.3px;white-space:nowrap}
+@media(max-width:768px){
+  .guide-fab{bottom:18px;right:18px;padding:13px}
+  .guide-fab-label{display:none}
+}
 .ai-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .ai-title-main{font-family:var(--serif);font-size:14px;font-weight:600}
 .ai-title-sub{font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
@@ -1804,7 +1812,6 @@ RULES:
                     React.createElement("div", { className: "live-dot", style: { background: "#ecb84c" } }),
                     React.createElement("span", { style: { color: "#ecb84c", ...M, fontSize: 8 } }, `${Object.values(emaMap).filter(x => x && x.flag).length} PRIME`)),
                 React.createElement("button", { className: "btn-ghost", style: { ...M, fontSize: 9 }, onClick: () => loadPrices(true), disabled: liveStatus === "loading" }, "\u21BB Refresh"),
-                React.createElement("button", { className: "guide-btn", onClick: () => setGuideOpen(true) }, "\uD83D\uDCD8 Finance Guide"),
                 React.createElement("button", { className: "btn-primary" }, "Subscribe \u2014 $50/mo"))),
         React.createElement("div", { className: "ticker-wrap" },
             React.createElement("div", { className: "ticker-inner" }, [...TICKER_SYMS, ...TICKER_SYMS].map((sym, i) => {
@@ -2190,6 +2197,9 @@ RULES:
                             React.createElement("button", { className: "btn-primary", style: { marginTop: 16, width: "100%", padding: "14px", fontSize: 14, fontWeight: 700, borderRadius: 10 } }, "Start 7-Day Free Trial"),
                             React.createElement("div", { style: { textAlign: "center", fontSize: 10, color: "var(--text3)", marginTop: 8 } }, "No credit card required"))),
                     React.createElement("div", { style: { textAlign: "center", marginTop: 16, fontSize: 10, color: "var(--text3)", lineHeight: 1.6, maxWidth: 640, marginLeft: "auto", marginRight: "auto" } }, "SENTINEL is an educational and informational tool, not financial, investment, tax, or legal advice, and not a recommendation to buy or sell any security. Signals are informational and do not predict future performance. No outcome or return is guaranteed. All investing involves risk, including the possible loss of principal. Past performance does not guarantee future results. Consult a licensed financial advisor before making investment decisions."))),
+            React.createElement("button", { className: `guide-fab${guideOpen ? " hidden" : ""}`, onClick: () => setGuideOpen(true), "aria-label": "Open Finance Guide" },
+                React.createElement("span", { className: "guide-fab-icon" }, "\uD83D\uDCD8"),
+                React.createElement("span", { className: "guide-fab-label" }, "Finance Guide")),
             React.createElement("div", { className: `ai-backdrop${guideOpen ? " open" : ""}`, onClick: () => setGuideOpen(false) }),
             React.createElement("div", { className: `ai-panel${guideOpen ? " open" : ""}` },
                 React.createElement("div", { className: "ai-header" },
