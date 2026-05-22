@@ -46,7 +46,7 @@ input:focus,textarea:focus{outline:none}
 .ticker-wrap{overflow:hidden;border-bottom:1px solid var(--border);background:var(--bg2);height:32px;display:flex;align-items:center}
 .ticker-inner{display:flex;white-space:nowrap;animation:ticker 60s linear infinite}
 .tick{display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1px solid var(--border);font-family:var(--mono);font-size:10px}
-.main{display:grid;grid-template-columns:210px 1fr 296px;height:calc(100vh - 88px)}
+.main{display:grid;grid-template-columns:210px 1fr;height:calc(100vh - 88px)}
 .sidebar{border-right:1px solid var(--border);background:var(--bg2);overflow-y:auto;padding:16px 0}
 .sidebar-label{font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;padding:0 20px;margin-bottom:8px}
 .tier-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;border:none;padding:7px 16px;font-size:11px;font-weight:500;color:var(--text2);text-align:left;margin-bottom:1px}
@@ -87,7 +87,14 @@ input:focus,textarea:focus{outline:none}
 .mom-track{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
 .mom-fill{height:100%;border-radius:2px}
 .mom-label{font-family:var(--mono);font-size:7px;color:var(--text3);min-width:26px}
-.ai-panel{border-left:1px solid var(--border);background:var(--bg2);display:flex;flex-direction:column;overflow:hidden}
+.ai-panel{position:fixed;top:0;right:0;width:360px;max-width:90vw;height:100vh;z-index:200;border-left:1px solid var(--border);background:var(--bg2);display:flex;flex-direction:column;overflow:hidden;transform:translateX(100%);transition:transform 0.28s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,0.4)}
+.ai-panel.open{transform:translateX(0)}
+.ai-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;opacity:0;pointer-events:none;transition:opacity 0.28s}
+.ai-backdrop.open{opacity:1;pointer-events:auto}
+.ai-close{background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;line-height:1}
+.ai-close:hover{color:var(--text)}
+.guide-btn{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-size:12px;color:var(--text);font-weight:600;cursor:pointer;transition:all 0.15s}
+.guide-btn:hover{border-color:var(--blue);color:var(--blue)}
 .ai-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .ai-title-main{font-family:var(--serif);font-size:14px;font-weight:600}
 .ai-title-sub{font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
@@ -110,6 +117,17 @@ input:focus,textarea:focus{outline:none}
 .quick-actions{display:flex;gap:5px;flex-wrap:wrap;padding:8px 14px 0}
 .quick-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:0.5px;cursor:pointer;transition:all 0.15s}
 .quick-btn:hover{border-color:var(--blue);color:var(--blue)}
+.topic-browser{max-height:240px;overflow-y:auto;padding:4px 2px}
+.topic-browser-hint{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.5px;padding:2px 4px 8px;text-transform:uppercase}
+.topic-group{margin-bottom:5px}
+.topic-cat{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--text);font-weight:600;cursor:pointer;transition:all 0.15s;text-align:left}
+.topic-cat:hover{border-color:var(--blue)}
+.topic-cat.open{border-color:var(--blue);color:var(--blue);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.topic-chev{font-family:var(--mono);font-size:13px;color:var(--text3)}
+.topic-qs{display:flex;flex-direction:column;gap:3px;padding:6px;background:var(--bg2);border:1px solid var(--border);border-top:none;border-radius:0 0 7px 7px}
+.topic-q{text-align:left;background:transparent;border:1px solid transparent;border-radius:5px;padding:7px 10px;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.12s}
+.topic-q:hover:not(:disabled){background:var(--bg3);color:var(--text);border-color:var(--border)}
+.topic-q:disabled{opacity:0.4;cursor:default}
 .pview{padding:24px 28px}
 .p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
 .p-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
@@ -155,7 +173,8 @@ input:focus,textarea:focus{outline:none}
 
 @media(max-width:768px){
   .layout{display:block;height:auto}
-  .sidebar,.ai-panel{display:none}
+  .sidebar{display:none}
+  .ai-panel{width:100vw;max-width:100vw}
   .topbar{padding:0 14px;height:50px}
   .brand-tag{display:none}
   .nav-tabs{display:none}
@@ -472,13 +491,153 @@ const KB = [
             { h: "The honest bottom line", c: "#e05c5c", t: "Earnings options trading combines two hard problems — predicting direction (near coin-flip) and overcoming IV crush — which is why most people lose money at it over time. Unless you deeply understand options pricing, this is not a path to dependable returns. Treat any money here as money you're fully prepared to lose, and never as a strategy for building wealth." },
             { h: "What to do instead", c: "#3ecf8e", t: "If you believe in a company long-term, simply owning the shares lets you benefit from its growth over years without the volatility-premium trap. The boring approach — own quality, add on weakness, hold — has built far more wealth than earnings options ever have." },
         ]
+    },
+    {
+        keys: ["what is a stock", "what are stocks", "what is a share", "explain stocks", "how do stocks work"],
+        title: "What Is a Stock?",
+        cat: "Basics",
+        ans: [
+            { h: "Ownership in a company", c: "#4facde", t: "A stock (or share) is a small piece of ownership in a company. If a company has a million shares and you own one, you own one-millionth of that business — its assets, and a claim on its future profits." },
+            { h: "How you make money", c: "#3ecf8e", t: "Two ways: the share price rises as the company grows more valuable (capital appreciation), and some companies pay out part of their profits to shareholders (dividends). Long-term investors aim to own good businesses and let both compound over years." },
+            { h: "The risk", c: "#e05c5c", t: "Stocks can fall as well as rise, and a single company can lose most or all of its value. That's why spreading money across many companies (diversification) and holding for the long term matters." },
+        ]
+    },
+    {
+        keys: ["what is an etf", "what are etfs", "exchange traded fund", "explain etf", "etf vs stock"],
+        title: "What Is an ETF?",
+        cat: "Basics",
+        ans: [
+            { h: "A basket of many investments", c: "#4facde", t: "An ETF (exchange-traded fund) is a single investment that holds many stocks or bonds at once. Buy one share of an S&P 500 ETF and you instantly own a tiny slice of 500 companies — instant diversification in one purchase." },
+            { h: "Why people like them", c: "#3ecf8e", t: "They're simple, low-cost, and spread your risk automatically. Instead of betting on one company, you own the whole group, so one company failing barely dents you. Low-cost index ETFs (like ones tracking the S&P 500) are a common foundation for long-term investors." },
+            { h: "Watch the fees", c: "#c9a84c", t: "ETFs charge a small yearly fee (the 'expense ratio'). The best broad index ETFs charge very little (often under 0.10%). Over decades, low fees make a real difference — so cheaper is usually better for plain index exposure." },
+        ]
+    },
+    {
+        keys: ["what is a mutual fund", "mutual funds", "mutual fund vs etf", "explain mutual fund"],
+        title: "What Is a Mutual Fund?",
+        cat: "Basics",
+        ans: [
+            { h: "Also a basket — but managed differently", c: "#4facde", t: "Like an ETF, a mutual fund pools money to hold many investments. The main differences: mutual funds trade once per day (after market close) rather than continuously, and many are 'actively managed' — a manager picks holdings trying to beat the market." },
+            { h: "The fee tradeoff", c: "#c9a84c", t: "Actively managed mutual funds often charge much higher fees than index ETFs (sometimes 0.5–1%+ vs under 0.1%). Over decades, those fees compound against you, and most active funds don't reliably beat a simple low-cost index. That's why many long-term investors prefer index funds." },
+            { h: "Not inherently good or bad", c: "#718096", t: "A mutual fund is just a wrapper — what matters is what's inside it and what it charges. A low-cost index mutual fund and a low-cost index ETF are very similar; a pricey active fund is the one to scrutinize." },
+        ]
+    },
+    {
+        keys: ["what is a bond", "what are bonds", "explain bonds", "how do bonds work", "treasury", "treasuries"],
+        title: "What Are Bonds?",
+        cat: "Basics",
+        ans: [
+            { h: "You're the lender", c: "#4facde", t: "A bond is a loan you make — to a government or company. They pay you interest over time, then return your principal at the end (maturity). US Treasury bonds are considered among the safest investments because they're backed by the US government." },
+            { h: "Their role: stability, not growth", c: "#c9a84c", t: "Bonds are generally calmer than stocks — they cushion a portfolio when stocks fall. The trade-off is the point: they've historically returned far less than stocks over the long run. You hold them to reduce swings and preserve capital, not to grow aggressively." },
+            { h: "Who leans on them", c: "#718096", t: "People closer to needing their money (near or in retirement) often hold more bonds for stability. Younger investors with long time horizons often hold fewer. How much is a personal decision based on your timeline and comfort with risk." },
+        ]
+    },
+    {
+        keys: ["what is a dividend", "dividends", "explain dividends", "how do dividends work", "dividend yield"],
+        title: "What Are Dividends?",
+        cat: "Basics",
+        ans: [
+            { h: "A share of the profits", c: "#4facde", t: "A dividend is a cash payment some companies make to shareholders, usually quarterly, out of their profits. If you own 100 shares and the dividend is $0.50/share, you receive $50 — just for holding the stock." },
+            { h: "The power of reinvesting", c: "#3ecf8e", t: "Instead of taking the cash, you can automatically buy more shares with it (DRIP). Those new shares then earn their own dividends, which buy more shares — a compounding snowball that, over decades, can dramatically grow a position." },
+            { h: "Not free money", c: "#c9a84c", t: "When a company pays a dividend, its share price typically drops by roughly that amount — you're getting your own money back, not a bonus. Dividends are valuable for steady income and reinvestment, but a high yield isn't automatically 'better.' Very high yields can signal a troubled company." },
+        ]
+    },
+    {
+        keys: ["compound interest", "compounding", "what is compounding", "power of compounding"],
+        title: "Compound Interest — The Key to Wealth",
+        cat: "Basics",
+        ans: [
+            { h: "Growth on your growth", c: "#3ecf8e", t: "Compounding means your earnings start earning too. $1,000 growing 8% becomes $1,080 — and next year you earn 8% on $1,080, not just the original $1,000. Each year the base gets bigger, so the gains accelerate." },
+            { h: "Time is the real ingredient", c: "#4facde", t: "Compounding is slow at first and dramatic later. Money invested for 30 years can grow many times over, with most of the growth happening in the final stretch. This is why starting early — even with small amounts — beats starting bigger but later." },
+            { h: "The takeaway", c: "#c9a84c", t: "The biggest lever isn't picking the perfect investment — it's time in the market and consistency. Reinvest, keep adding, and let decades do the heavy lifting. Nothing is guaranteed, but compounding is the closest thing investing has to a superpower." },
+        ]
+    },
+    {
+        keys: ["dollar cost averaging", "dollar-cost averaging", "what is dollar-cost averaging", "what is dollar cost averaging", "dca", "what is dca", "should i invest all at once", "lump sum vs"],
+        title: "Dollar-Cost Averaging (DCA)",
+        cat: "Strategy",
+        ans: [
+            { h: "Invest steadily, on a schedule", c: "#4facde", t: "Dollar-cost averaging means investing a fixed amount on a regular schedule (say $200 every month) no matter what the market is doing — instead of trying to time one perfect entry." },
+            { h: "Why it helps", c: "#3ecf8e", t: "When prices are high, your fixed amount buys fewer shares; when prices are low, it buys more. Over time this smooths out your average cost and removes the stress (and poor track record) of trying to guess the bottom. It also builds a consistent saving habit." },
+            { h: "Honest nuance", c: "#718096", t: "Historically, investing a lump sum right away has often outperformed DCA on average, simply because markets tend to rise over time. But DCA is easier emotionally and is what most people naturally do with each paycheck. Both are reasonable; consistency matters more than the choice." },
+        ]
+    },
+    {
+        keys: ["diversification", "diversify", "what is diversification", "dont put all eggs", "spread risk"],
+        title: "Diversification",
+        cat: "Strategy",
+        ans: [
+            { h: "Don't bet everything on one thing", c: "#4facde", t: "Diversification means spreading your money across many investments — different companies, industries, and asset types — so no single failure can sink you. If you own 100 companies and one collapses, you barely feel it." },
+            { h: "The simplest version", c: "#3ecf8e", t: "A broad index fund is diversification in one purchase — it holds hundreds of companies across every sector. That's why low-cost index funds are such a common foundation: instant, cheap diversification." },
+            { h: "Don't over-concentrate", c: "#c9a84c", t: "A common mistake is putting too much in one stock you love — even a great company. A widely-used guideline is keeping any single stock to a small share of your portfolio. Diversification won't make you rich overnight, but it's one of the best protections against being wiped out." },
+        ]
+    },
+    {
+        keys: ["what is a 401k", "401k", "explain 401k", "employer match", "how does a 401k work"],
+        title: "What Is a 401(k)?",
+        cat: "Accounts & Taxes",
+        ans: [
+            { h: "A retirement account through work", c: "#4facde", t: "A 401(k) is a retirement savings account offered by an employer. You contribute from your paycheck before taxes, the money grows invested over decades, and you pay taxes later when you withdraw in retirement." },
+            { h: "The employer match is free money", c: "#3ecf8e", t: "Many employers match part of your contributions — e.g. they add 50¢ for every $1 you put in, up to a limit. If your employer matches, contributing at least enough to get the full match is one of the best moves in personal finance: it's an immediate guaranteed return you won't find anywhere else." },
+            { h: "Tradeoffs to know", c: "#c9a84c", t: "The money is meant for retirement, so withdrawing early usually means taxes plus a penalty. Investment choices are limited to what the plan offers (often low-cost index funds, which are a fine default). It's a powerful long-term tool, not a place for money you'll need soon." },
+        ]
+    },
+    {
+        keys: ["capital gains", "capital gains tax", "tax on stocks", "do i pay tax on stocks", "long term capital gains"],
+        title: "Capital Gains Tax Basics",
+        cat: "Accounts & Taxes",
+        ans: [
+            { h: "Tax on your profit", c: "#4facde", t: "When you sell an investment for more than you paid, the profit is a 'capital gain,' and it's generally taxable. You're taxed on the gain, not the whole amount — sell for $1,200 what you bought for $1,000, and the $200 gain is what counts." },
+            { h: "Holding longer can mean lower tax", c: "#3ecf8e", t: "In the US, investments held longer than a year usually get taxed at lower 'long-term' rates than those sold within a year ('short-term,' taxed as ordinary income). This is one more reason patient, long-term holding can be rewarded — though tax rules vary and change." },
+            { h: "Not tax advice", c: "#c9a84c", t: "Taxes get complicated fast (accounts, losses, your income bracket, where you live). This is a general explanation, not tax advice — for your own situation, a tax professional is the right call. Tax-advantaged accounts like Roth IRAs and 401(k)s can change the picture significantly." },
+        ]
+    },
+    {
+        keys: ["emergency fund", "what is an emergency fund", "rainy day fund", "how much emergency fund", "should i invest emergency"],
+        title: "Emergency Fund — Before You Invest",
+        cat: "Strategy",
+        ans: [
+            { h: "Your financial safety net", c: "#4facde", t: "An emergency fund is cash set aside for life's surprises — job loss, medical bills, a car repair. It's kept somewhere safe and instantly accessible (like a high-yield savings account), not invested in stocks." },
+            { h: "Why it comes first", c: "#3ecf8e", t: "Without one, an emergency forces you to sell investments at the worst possible time (often during a downturn) or take on debt. A common guideline is 3–6 months of essential expenses. Having this cushion is what lets you invest calmly and leave your investments alone through market dips." },
+            { h: "Keep it out of the market", c: "#c9a84c", t: "Emergency money should not be in stocks — its job is to be there in full when you need it, not to grow. Build (or top up) your emergency fund before putting money into investments you can't afford to see drop." },
+        ]
+    },
+    {
+        keys: ["bull market", "bear market", "what is a bull market", "what is a bear market", "bull vs bear", "correction", "crash"],
+        title: "Bull Markets, Bear Markets & Corrections",
+        cat: "Market Concepts",
+        ans: [
+            { h: "The basic terms", c: "#4facde", t: "A bull market is a sustained period of rising prices and optimism. A bear market is a prolonged decline, commonly defined as a drop of 20% or more from recent highs. A 'correction' is a smaller pullback, usually 10–20%." },
+            { h: "They're normal and recurring", c: "#3ecf8e", t: "Declines feel alarming but are a regular part of investing — markets have gone through many bears and corrections and, historically, eventually gone on to new highs (though that's never guaranteed for any specific case). Knowing they're normal helps you avoid panic-selling at the bottom." },
+            { h: "What matters for you", c: "#c9a84c", t: "Trying to predict the next bull or bear reliably is something even professionals fail at. For long-term investors, the proven approach is to keep investing through both, stay diversified, and not make emotional decisions during the scary parts. Time in the market beats timing the market." },
+        ]
+    },
+    {
+        keys: ["pe ratio", "p/e ratio", "price to earnings", "what is pe ratio", "valuation", "is a stock expensive"],
+        title: "What Is the P/E Ratio?",
+        cat: "Market Concepts",
+        ans: [
+            { h: "Price relative to profits", c: "#4facde", t: "The P/E (price-to-earnings) ratio compares a stock's price to its annual earnings per share. A P/E of 20 means you're paying $20 for every $1 of yearly profit. It's a rough gauge of how expensive a stock is relative to what it earns." },
+            { h: "High vs low", c: "#c9a84c", t: "A high P/E can mean investors expect strong future growth — or that the stock is overpriced. A low P/E can mean a bargain — or a struggling company. P/E alone tells you little; it only means something compared to the company's own history, its industry, and its growth prospects." },
+            { h: "Use it as one clue, not a verdict", c: "#718096", t: "Valuation matters, but no single number decides whether something is a good investment. P/E is one input among many, and fast-growing companies often look 'expensive' on P/E for years while still doing well. Treat it as a starting question, not an answer." },
+        ]
+    },
+    {
+        keys: ["inflation", "what is inflation", "how does inflation affect", "purchasing power"],
+        title: "Inflation & Why Investing Matters",
+        cat: "Market Concepts",
+        ans: [
+            { h: "Your money slowly buys less", c: "#4facde", t: "Inflation is the gradual rise in prices over time. At 3% inflation, something that costs $100 today costs about $103 next year. The same dollar buys a little less each year — that's falling 'purchasing power.'" },
+            { h: "Why cash alone loses", c: "#c9a84c", t: "Money sitting in a low-interest account quietly loses value to inflation over time. This is the core reason people invest: to grow money faster than inflation erodes it, preserving and building real purchasing power for the future." },
+            { h: "What tends to outpace it", c: "#3ecf8e", t: "Historically, stocks have grown faster than inflation over long periods, which is why they're central to long-term wealth building (with no guarantees for any given stretch). It's also why keeping everything in cash, while feeling 'safe,' carries its own quiet long-term cost." },
+        ]
     }
 ];
 // ─── SMART MATCHING FUNCTION ─────────────────────────────────────────────────
 function findAnswer(input) {
     const q = input.toLowerCase().trim();
     // Remove punctuation for matching
-    const clean = q.replace(/[?!.,]/g, '');
+    const clean = q.replace(/[?!.,]/g, '').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
     const qWords = clean.split(/\s+/);
     let bestMatch = null;
     let bestScore = 0;
@@ -1267,6 +1426,30 @@ function ChartModal({ asset, onClose }) {
             })(),
             React.createElement("div", { className: "chart-modal-note" }, "Monthly chart \u00B7 switch timeframe with the control on the chart toolbar \u00B7 live data & chart by TradingView"))));
 }
+// ─── TOPIC BROWSER (replaces free-type box; tappable categorized questions) ────
+const TOPICS = [
+    { cat: "Getting Started", qs: ["How to start investing", "How to invest", "What should I invest in?", "How much to invest", "What is an emergency fund?"] },
+    { cat: "The Basics", qs: ["What is a stock?", "What is an ETF?", "What is a mutual fund?", "What are bonds?", "What are dividends?", "What is compound interest?"] },
+    { cat: "Strategy", qs: ["How to build wealth", "What is dollar-cost averaging?", "What is diversification?", "Risk rules", "What is DRIP?"] },
+    { cat: "Accounts & Taxes", qs: ["What is a Roth IRA?", "What is a 401k?", "Capital gains tax basics"] },
+    { cat: "Market Concepts", qs: ["What is a bull market?", "What is inflation?", "What is the P/E ratio?", "What to do in a market crash"] },
+    { cat: "Earnings", qs: ["How do earnings work?", "Why did my stock drop after good earnings?", "Should I buy options before earnings?"] },
+    { cat: "Using SENTINEL", qs: ["Explain the signals", "What is the Score?", "What is SPEC ENTRY?", "What are index funds?"] },
+];
+function TopicBrowser({ onPick, disabled }) {
+    const [open, setOpen] = useState("Getting Started");
+    return React.createElement("div", { className: "topic-browser" },
+        React.createElement("div", { className: "topic-browser-hint" }, "Tap a topic, then a question:"),
+        TOPICS.map(group => {
+            const isOpen = open === group.cat;
+            return React.createElement("div", { key: group.cat, className: "topic-group" },
+                React.createElement("button", { className: `topic-cat${isOpen ? " open" : ""}`, onClick: () => setOpen(isOpen ? "" : group.cat) },
+                    React.createElement("span", null, group.cat),
+                    React.createElement("span", { className: "topic-chev" }, isOpen ? "\u2212" : "+")),
+                isOpen && React.createElement("div", { className: "topic-qs" },
+                    group.qs.map(q => React.createElement("button", { key: q, className: "topic-q", disabled: disabled, onClick: () => onPick(q) }, q))));
+        }));
+}
 // ─── APP ──────────────────────────────────────────────────────────────────────
 function App() {
     const [prices, setPrices] = useState(STATIC);
@@ -1278,6 +1461,7 @@ function App() {
     const [sortBy, setSortBy] = useState("score");
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState(null);
+    const [guideOpen, setGuideOpen] = useState(false);
     const [chartAsset, setChartAsset] = useState(null);
     const [emaMap, setEmaMap] = useState({}); // symbol → confluence result (lazy, additive)
     const [seasSym, setSeasSym] = useState("SPX"); // seasonality view subject; "SPX" = broad-market reference
@@ -1441,6 +1625,7 @@ function App() {
         if (!msg.trim() || loading)
             return;
         const txt = msg.trim();
+        setGuideOpen(true); // surface the panel for any question or Analyze click
         setInput("");
         setMsgs(p => [...p, { role: "user", type: "text", content: txt }]);
         // ── STEP 1: Check local knowledge base first ─────────────────────────────
@@ -1619,6 +1804,7 @@ RULES:
                     React.createElement("div", { className: "live-dot", style: { background: "#ecb84c" } }),
                     React.createElement("span", { style: { color: "#ecb84c", ...M, fontSize: 8 } }, `${Object.values(emaMap).filter(x => x && x.flag).length} PRIME`)),
                 React.createElement("button", { className: "btn-ghost", style: { ...M, fontSize: 9 }, onClick: () => loadPrices(true), disabled: liveStatus === "loading" }, "\u21BB Refresh"),
+                React.createElement("button", { className: "guide-btn", onClick: () => setGuideOpen(true) }, "\uD83D\uDCD8 Finance Guide"),
                 React.createElement("button", { className: "btn-primary" }, "Subscribe \u2014 $50/mo"))),
         React.createElement("div", { className: "ticker-wrap" },
             React.createElement("div", { className: "ticker-inner" }, [...TICKER_SYMS, ...TICKER_SYMS].map((sym, i) => {
@@ -1998,17 +2184,19 @@ RULES:
                             React.createElement("div", { style: { ...M, fontSize: 8, color: "var(--blue)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 6 } }, "Most Popular"),
                             React.createElement("div", { style: { ...S, fontSize: 36, fontWeight: 700, color: "var(--blue)", marginBottom: 4 } }, "$50"),
                             React.createElement("div", { style: { fontSize: 13, color: "var(--text2)", marginBottom: 20 } }, "per month \u00B7 cancel anytime"),
-                            ["Everything in Free", "Live prices on all 60 assets", "Unlimited AI advisor", "GENERATIONAL & BUY NOW alerts", "Portfolio tracker with P&L", "Wealth projection modeling", "Seasonal entry window guidance", "Priority support"].map(f => React.createElement("div", { key: f, style: { display: "flex", gap: 8, marginBottom: 8, fontSize: 12, color: "var(--text2)" } },
+                            ["Everything in Free", "Live prices on all 60 assets", "Full Finance Guide library", "GENERATIONAL & BUY NOW alerts", "Portfolio tracker with P&L", "Wealth projection modeling", "Seasonal entry window guidance", "Priority support"].map(f => React.createElement("div", { key: f, style: { display: "flex", gap: 8, marginBottom: 8, fontSize: 12, color: "var(--text2)" } },
                                 React.createElement("span", { style: { color: "var(--blue)", fontSize: 11, marginTop: 1 } }, "\u2713"),
                                 f)),
                             React.createElement("button", { className: "btn-primary", style: { marginTop: 16, width: "100%", padding: "14px", fontSize: 14, fontWeight: 700, borderRadius: 10 } }, "Start 7-Day Free Trial"),
                             React.createElement("div", { style: { textAlign: "center", fontSize: 10, color: "var(--text3)", marginTop: 8 } }, "No credit card required"))),
                     React.createElement("div", { style: { textAlign: "center", marginTop: 16, fontSize: 10, color: "var(--text3)", lineHeight: 1.6, maxWidth: 640, marginLeft: "auto", marginRight: "auto" } }, "SENTINEL is an educational and informational tool, not financial, investment, tax, or legal advice, and not a recommendation to buy or sell any security. Signals are informational and do not predict future performance. No outcome or return is guaranteed. All investing involves risk, including the possible loss of principal. Past performance does not guarantee future results. Consult a licensed financial advisor before making investment decisions."))),
-            React.createElement("div", { className: "ai-panel" },
+            React.createElement("div", { className: `ai-backdrop${guideOpen ? " open" : ""}`, onClick: () => setGuideOpen(false) }),
+            React.createElement("div", { className: `ai-panel${guideOpen ? " open" : ""}` },
                 React.createElement("div", { className: "ai-header" },
                     React.createElement("div", null,
-                        React.createElement("div", { className: "ai-title-main" }, "Intelligence Advisor"),
-                        React.createElement("div", { className: "ai-title-sub" }, selected ? `Analyzing ${selected}` : "Instant answers · 24/7"))),
+                        React.createElement("div", { className: "ai-title-main" }, "Finance Guide"),
+                        React.createElement("div", { className: "ai-title-sub" }, selected ? `Analyzing ${selected}` : "Learn the concepts \u00B7 tap a topic")),
+                    React.createElement("button", { className: "ai-close", onClick: () => setGuideOpen(false), "aria-label": "Close" }, "\u00D7")),
                 React.createElement("div", { className: "quick-actions" }, ["Explain the signals", "What are index funds?", "What is the Score?", "How to start investing", "How do earnings work?", "What is DRIP?", "Risk rules", "What is a Roth IRA?", "What is SPEC ENTRY?"].map(q => (React.createElement("button", { key: q, className: "quick-btn", onClick: () => sendMsg(q) }, q)))),
                 React.createElement("div", { className: "ai-msgs" },
                     msgs.map((m, i) => (React.createElement("div", { key: i, className: `msg ${m.role}` },
@@ -2019,11 +2207,7 @@ RULES:
                         React.createElement("div", { className: "msg-bubble loading" })),
                     React.createElement("div", { ref: chatEnd })),
                 React.createElement("div", { className: "ai-input-wrap" },
-                    React.createElement("textarea", { className: "ai-input", placeholder: "Ask about signals, portfolio, wealth building\u2026", value: input, onChange: e => setInput(e.target.value), onKeyDown: e => { if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMsg(input);
-                        } }, rows: 1 }),
-                    React.createElement("button", { className: "ai-send", onClick: () => sendMsg(input), disabled: loading || !input.trim() }, loading ? React.createElement("div", { style: { width: 12, height: 12, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" } }) : "↑")))),
+                    React.createElement(TopicBrowser, { onPick: q => sendMsg(q), disabled: loading })))),
         chartAsset && React.createElement(ChartModal, { asset: chartAsset, onClose: () => setChartAsset(null) })));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
