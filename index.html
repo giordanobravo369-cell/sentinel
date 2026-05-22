@@ -1403,7 +1403,7 @@ function App() {
         const ema = emaMap[a.s] || null;
         return { ...a, pd, score, breaches, signal, ema };
     });
-    const sigOrder = { "GENERATIONAL": 0, "BUY NOW": 1, "MONITOR": 2, "HOLD": 3, "WAIT": 4 };
+    const sigOrder = { "GENERATIONAL": 0, "BUY NOW": 1, "SPEC ENTRY": 2, "MONITOR": 3, "HOLD": 4, "WAIT": 5 };
     const filtered = scored
         .filter(a => tierFilter === "All" || a.t === tierFilter)
         .filter(a => sigFilter === "All" || a.signal.label === sigFilter)
@@ -1412,7 +1412,7 @@ function App() {
         .sort((a, b) => {
         var _a, _b;
         if (sortBy === "score") {
-            const so = ((_a = sigOrder[a.signal.label]) !== null && _a !== void 0 ? _a : 5) - ((_b = sigOrder[b.signal.label]) !== null && _b !== void 0 ? _b : 5);
+            const so = ((_a = sigOrder[a.signal.label]) !== null && _a !== void 0 ? _a : 6) - ((_b = sigOrder[b.signal.label]) !== null && _b !== void 0 ? _b : 6);
             if (so !== 0)
                 return so;
             return b.score - a.score;
