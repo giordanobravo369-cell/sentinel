@@ -285,7 +285,7 @@ const KB = [
         ]
     },
     {
-        keys: ["how do i invest", "how to invest", "how should i invest", "how to divide", "how to split", "how to allocate", "portfolio allocation", "how much should i put", "invest $100", "invest 100", "$100", "divide my money", "split my money", "how much to invest", "how to start", "getting started", "where do i begin", "new to investing", "beginner", "just starting", "start investing", "how do i begin", "where do i start"],
+        keys: ["how do i invest", "how to invest", "how should i invest", "what should i invest", "what should i buy", "what to invest in", "what do i invest in", "where should i invest", "what should i invest in right now", "what to buy", "how to divide", "how to split", "how to allocate", "portfolio allocation", "how much should i put", "invest $100", "invest 100", "$100", "divide my money", "split my money", "how much to invest", "how to start", "getting started", "where do i begin", "new to investing", "beginner", "just starting", "start investing", "how do i begin", "where do i start"],
         title: "How to Invest — The Framework",
         ans: [
             { h: "40-50% Foundation", c: "#3ecf8e", t: "Index ETFs: VOO, VTI, SPY, QQQ. A common approach is to buy consistently each month rather than trying to time the market. Historically, the S&P 500 has not had a negative 20-year period — though past performance never guarantees future results. Many long-term investors treat broad index funds as their core holding." },
@@ -479,26 +479,36 @@ function findAnswer(input) {
     const q = input.toLowerCase().trim();
     // Remove punctuation for matching
     const clean = q.replace(/[?!.,]/g, '');
+    const qWords = clean.split(/\s+/);
     let bestMatch = null;
     let bestScore = 0;
     for (const entry of KB) {
         for (const key of entry.keys) {
-            // Exact phrase match
+            // Exact phrase match — strongest signal. Longer key = more specific.
             if (clean.includes(key) || q.includes(key)) {
-                const score = key.length; // longer key = more specific match = better
+                const score = 100 + key.length; // phrase matches always beat word-overlap
                 if (score > bestScore) {
                     bestScore = score;
                     bestMatch = entry;
                 }
             }
-            // Word overlap match
-            const keyWords = key.split(' ').filter(w => w.length > 3);
-            const qWords = clean.split(' ');
-            const matches = keyWords.filter(kw => qWords.some(qw => qw.includes(kw) || kw.includes(qw)));
-            const overlapScore = matches.length * 2;
-            if (overlapScore > bestScore && matches.length >= Math.min(2, keyWords.length)) {
-                bestScore = overlapScore;
-                bestMatch = entry;
+            // Word-overlap match — only WHOLE-WORD matches count (no substring
+            // fragments like "invest" matching "investors"), and we require a
+            // meaningful share of the key's words to overlap, not just one.
+            const keyWords = key.split(/\s+/).filter(w => w.length > 3);
+            if (keyWords.length === 0)
+                continue;
+            const matches = keyWords.filter(kw => qWords.includes(kw));
+            // Require at least 2 overlapping words, OR all words of a 1-word key
+            // that is itself distinctive (length > 4). This stops a single loose
+            // word from hijacking the match.
+            const need = keyWords.length === 1 ? 1 : 2;
+            if (matches.length >= need && (keyWords.length > 1 || keyWords[0].length > 4)) {
+                const overlapScore = matches.length * 3; // capped well below phrase matches
+                if (overlapScore > bestScore) {
+                    bestScore = overlapScore;
+                    bestMatch = entry;
+                }
             }
         }
     }
