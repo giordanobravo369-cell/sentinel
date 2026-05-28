@@ -102,7 +102,8 @@ input:focus,textarea:focus{outline:none}
 .sym-tier{font-family:var(--mono);font-size:9px;margin-top:2px;opacity:0.9}
 .asset-name{font-size:12.5px;color:var(--text2);padding-right:8px}
 .asset-note{font-size:11px;color:var(--text3);margin-top:2px}
-.lim-chip{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:#d9a441;background:rgba(217,164,65,0.1);border:1px solid rgba(217,164,65,0.32);border-radius:5px;padding:2px 7px;cursor:help;white-space:nowrap}
+.lim-chip{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:#d9a441;background:rgba(217,164,65,0.1);border:1px solid rgba(217,164,65,0.32);border-radius:5px;padding:2px 7px;cursor:pointer;white-space:nowrap;user-select:none;transition:background .15s,border-color .15s}
+.lim-chip:hover{background:rgba(217,164,65,0.16);border-color:rgba(217,164,65,0.5)}
 .price-val{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--text)}
 .price-chg{font-family:var(--mono);font-size:10.5px;margin-top:1px}
 .mom-wrap{display:flex;flex-direction:column;gap:3px;width:100%;max-width:420px}
@@ -995,6 +996,18 @@ const WL = [
     { s: "VRTX", n: "Vertex Pharma", t: "HEALTHCARE", note: "Cystic fibrosis & gene therapy" },
     { s: "INTU", n: "Intuit", t: "BLUE CHIP", note: "TurboTax & QuickBooks software" },
     { s: "BTC/USD", n: "Bitcoin", t: "SPECULATIVE", note: "Crypto \u2014 trades 24/7, very high volatility" },
+];
+// ─── VIDEOS ───────────────────────────────────────────────────────────────────
+// Tutorial videos shown in the "Videos" tab. Add an entry for each new video.
+// `youtubeId` is the bit after v= in a YouTube URL (e.g., "dQw4w9WgXcQ").
+// While this array is empty, the tab shows a polished "coming soon" state.
+const VIDEOS = [
+    // {
+    //     title: "Getting started with SENTINEL",
+    //     description: "A 5-minute walkthrough of the dashboard \u2014 how to read each signal and what to do with them.",
+    //     youtubeId: "REPLACE_WITH_YOUTUBE_ID",
+    //     duration: "5:12"
+    // },
 ];
 const TIER_COLORS = {
     "CORE": "#4facde", "MEGA CAP": "#9f7aea", "BLUE CHIP": "#c9a84c",
@@ -1994,6 +2007,26 @@ function SeasLine({ values, zero, curMo, unit }) {
 }
 // ─── BACKTEST DISPLAY COMPONENTS ────────────────────────────────────────────────
 function fmtPctBt(x) { return (x >= 0 ? "+" : "") + (x * 100).toFixed(1) + "%"; }
+// Themed click popup for the "Limited history" chip, matching the backtest "i" icons.
+// Self-contained component so each row's popup has its own state (no shared chatter).
+function LimChip() {
+    const [open, setOpen] = React.useState(false);
+    React.useEffect(() => {
+        if (!open) return;
+        const close = () => setOpen(false);
+        document.addEventListener("click", close);
+        return () => document.removeEventListener("click", close);
+    }, [open]);
+    return React.createElement("span", { style: { position: "relative", display: "inline-block" } },
+        React.createElement("span", {
+            className: "lim-chip",
+            onClick: (e) => { e.stopPropagation(); setOpen(!open); }
+        }, "Limited history"),
+        open && React.createElement("div", {
+            onClick: (e) => e.stopPropagation(),
+            style: { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 60, width: 280, background: "var(--bg4)", border: "1px solid var(--border2)", borderRadius: 8, padding: "10px 12px", fontFamily: "var(--mono)", fontSize: 10.5, fontWeight: 400, lineHeight: 1.55, color: "var(--text2)", textTransform: "none", letterSpacing: 0, textAlign: "left", boxShadow: "0 10px 28px rgba(0,0,0,0.5)", whiteSpace: "normal" }
+        }, "Under ~4 years of trading data \u2014 its long-term moving-average support and seasonality can't be computed reliably, so its signal and score lean on a simpler drop-from-high + RSI read. Treat any actionable signal here with extra caution."));
+}
 function fmtBtDate(s) {
     if (!s) return "\u2014";
     const mo = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -2876,7 +2909,7 @@ RULES:
                 React.createElement("div", { style: { display: "flex", alignItems: "baseline" } },
                     React.createElement("span", { className: "brand-name" }, "Sentinel"),
                     React.createElement("span", { className: "brand-tag" }, "Wealth Intelligence"))),
-            React.createElement("div", { className: "nav-tabs", style: { display: "flex", gap: 4 } }, [["scan", "Market Scan"], ["seasonality", "Seasonality"], ["backtest", "Backtest"], ["portfolio", "Portfolio"], ["guide", "How to Use"], ["pricing", "Pricing"]].map(([id, lbl]) => (React.createElement("button", { key: id, className: `nav-tab${tab === id ? " active" : ""}`, onClick: () => setTab(id) }, lbl)))),
+            React.createElement("div", { className: "nav-tabs", style: { display: "flex", gap: 4 } }, [["scan", "Market Scan"], ["seasonality", "Seasonality"], ["backtest", "Backtest"], ["portfolio", "Portfolio"], ["guide", "How to Use"], ["videos", "Videos"], ["pricing", "Pricing"]].map(([id, lbl]) => (React.createElement("button", { key: id, className: `nav-tab${tab === id ? " active" : ""}`, onClick: () => setTab(id) }, lbl)))),
             React.createElement("div", { className: "h-scroll-ind nav-scroll-ind", "data-target": ".nav-tabs" },
                 React.createElement("span", { className: "hs-arrow hs-arrow-l", onClick: e => { const c = document.querySelector(".nav-tabs"); if (c) c.scrollBy({ left: -200, behavior: "smooth" }); } }, "\u2039"),
                 React.createElement("div", { className: "h-scroll-track" }, React.createElement("div", { className: "h-scroll-thumb" })),
@@ -3022,7 +3055,7 @@ RULES:
                             React.createElement("div", null,
                                 React.createElement("div", { className: "asset-name" }, a.n),
                                 React.createElement("div", { className: "asset-note" }, a.note),
-                                limited && React.createElement("span", { className: "lim-chip", title: "Under ~4 years of trading data \u2014 its long-term moving-average support and seasonality can't be computed reliably, so its signal and score lean on a simpler drop-from-high + RSI read. Treat any actionable signal here with extra caution." }, "Limited history")),
+                                limited && React.createElement(LimChip)),
                             React.createElement("div", { className: "cell-price" }, a.pd && a.pd.h > 0 && React.createElement(React.Fragment, null,
                                 React.createElement("div", { className: "price-val", style: { fontSize: 13 } },
                                     "\u2212",
@@ -3461,6 +3494,27 @@ RULES:
                                 React.createElement("div", { style: { ...M, fontSize: 14, fontWeight: 700, color: col } }, sym),
                                 React.createElement("div", { style: { fontSize: 13, color: "var(--text)", marginTop: 3, fontWeight: 500 } }, name),
                                 React.createElement("div", { style: { fontSize: 11.5, color: "var(--text3)", marginTop: 3, lineHeight: 1.45 } }, desc)))))))),
+                tab === "videos" && React.createElement("div", { className: "seas-view" },
+                    React.createElement("div", { style: { ...S, fontSize: 26, fontWeight: 700, marginBottom: 6 } }, "Videos"),
+                    React.createElement("div", { style: { color: "var(--text2)", fontSize: 13, marginBottom: 24, maxWidth: 720, lineHeight: 1.65 } },
+                        "Short walkthroughs showing how to read each signal, when to act, and how to use the seasonality and backtest tabs effectively."),
+                    VIDEOS.length === 0
+                        ? React.createElement("div", { style: { textAlign: "center", padding: "60px 20px 80px", background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14 } },
+                            React.createElement("div", { style: { width: 86, height: 86, margin: "0 auto 22px", borderRadius: "50%", background: "rgba(79,172,222,0.07)", border: "1px solid rgba(79,172,222,0.28)", display: "flex", alignItems: "center", justifyContent: "center" } },
+                                React.createElement("svg", { width: 38, height: 38, viewBox: "0 0 24 24", fill: "var(--blue)", style: { marginLeft: 4 } },
+                                    React.createElement("path", { d: "M8 5v14l11-7z" }))),
+                            React.createElement("div", { style: { ...S, fontSize: 22, fontWeight: 600, marginBottom: 10, color: "var(--text)" } }, "Tutorial videos coming soon"),
+                            React.createElement("div", { style: { color: "var(--text2)", fontSize: 13.5, maxWidth: 480, margin: "0 auto", lineHeight: 1.65 } },
+                                "We're putting together a short series of walkthroughs \u2014 reading the signals, using the backtest tab honestly, and building a long-term watchlist. Check back here once they're up."),
+                            React.createElement("div", { style: { ...M, fontSize: 10, color: "var(--text3)", marginTop: 22, letterSpacing: 1.2, textTransform: "uppercase" } }, "In production"))
+                        : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 22 } },
+                            VIDEOS.map((v, k) => React.createElement("div", { key: k, style: { background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden", display: "flex", flexDirection: "column" } },
+                                React.createElement("div", { style: { width: "100%", aspectRatio: "16/9", background: "#000" } },
+                                    React.createElement("iframe", { src: `https://www.youtube.com/embed/${v.youtubeId}`, style: { width: "100%", height: "100%", border: 0, display: "block" }, allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share", allowFullScreen: true, title: v.title })),
+                                React.createElement("div", { style: { padding: "16px 18px 18px", display: "flex", flexDirection: "column", gap: 6 } },
+                                    React.createElement("div", { style: { ...S, fontSize: 16, fontWeight: 600, color: "var(--text)" } }, v.title),
+                                    React.createElement("div", { style: { color: "var(--text2)", fontSize: 12.5, lineHeight: 1.55 } }, v.description),
+                                    v.duration && React.createElement("div", { style: { ...M, fontSize: 10, color: "var(--text3)", marginTop: 4, letterSpacing: 0.5 } }, v.duration)))))),
                 tab === "pricing" && React.createElement("div", { className: "pricing-view" },
                     React.createElement("div", { style: { ...M, fontSize: 10.5, color: "var(--blue)", letterSpacing: 4, textTransform: "uppercase", textAlign: "center", marginBottom: 12 } }, "Simple, Fair Pricing"),
                     React.createElement("div", { style: { ...S, fontSize: 32, fontWeight: 700, textAlign: "center", marginBottom: 8 } }, "Wealth Starts With the Right Information"),
@@ -3488,7 +3542,7 @@ RULES:
                 React.createElement("span", { className: "guide-fab-icon" }, "\uD83D\uDCD8"),
                 React.createElement("span", { className: "guide-fab-label" }, "Finance Guide")),
             React.createElement("nav", { className: "mob-nav" },
-                [["scan", "Scan", "\uD83D\uDCCA"], ["seasonality", "Season", "\uD83D\uDCC8"], ["backtest", "Test", "\uD83D\uDD2C"], ["portfolio", "Folio", "\uD83D\uDCBC"], ["pricing", "Plans", "\u2B50"]].map(([id, lbl, icon]) => (
+                [["scan", "Scan", "\uD83D\uDCCA"], ["seasonality", "Season", "\uD83D\uDCC8"], ["backtest", "Test", "\uD83D\uDD2C"], ["portfolio", "Folio", "\uD83D\uDCBC"], ["videos", "Videos", "\uD83C\uDFA5"], ["pricing", "Plans", "\u2B50"]].map(([id, lbl, icon]) => (
                     React.createElement("button", { key: id, className: `mob-nav-btn${tab === id ? " active" : ""}`, onClick: () => setTab(id) },
                         React.createElement("span", { className: "mob-nav-icon" }, icon),
                         React.createElement("span", { className: "mob-nav-label" }, lbl)))) ),
